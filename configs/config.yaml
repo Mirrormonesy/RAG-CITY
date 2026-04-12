@@ -1,0 +1,45 @@
+qwen:
+  api_key_env: QWEN_API_KEY
+  router_model: qwen-turbo
+  extract_model: qwen-turbo
+  summary_model: qwen-turbo
+  generate_model: qwen-plus
+  timeout: 30
+  max_retries: 2
+
+embedding:
+  model: BAAI/bge-large-zh-v1.5
+  device: cuda
+  batch_size: 64
+
+reranker:
+  model: BAAI/bge-reranker-v2-m3
+  device: cuda
+  top_n: 5
+
+data:
+  categories: [手机, 美妆]
+  max_reviews_per_product: 30
+  min_review_length: 10
+  max_review_length: 500
+
+retrieval:
+  vector_k: 20
+  graph_k_communities: 3
+  graph_k_reviews: 15
+  rrf_k_const: 60
+  final_top_n: 5
+
+generation:
+  temperature: 0.3
+  max_tokens: 1024
+  top_p: 0.9
+
+paths:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  chroma_docs: indices/chroma_docs
+  chroma_summaries: indices/chroma_summaries
+  graph: indices/graph.pkl
+  communities: indices/communities.json
+  logs: logs/app.log
