@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+logs/
+indices/
+data/raw/
+data/processed/
+*.pkl
+report/*.docx
+.ipynb_checkpoints/
+.pytest_cache/
