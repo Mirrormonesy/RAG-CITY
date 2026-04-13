@@ -1,9 +1,17 @@
 """从 config 加载所有索引,构造一个 HybridRAG 实例。"""
 import os
+from pathlib import Path
 import pandas as pd
 from dotenv import load_dotenv
 from langchain_community.vectorstores import Chroma
 from src.utils.config import load_config
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+
+def _abs(p: str) -> str:
+    pp = Path(p)
+    return str(pp if pp.is_absolute() else (PROJECT_ROOT / pp))
 from src.utils.llm_client import QwenClient
 from src.indexing.embeddings import load_bge_embedding
 from src.indexing.graph_builder import load_graph
@@ -26,23 +34,25 @@ def build_hybrid_rag(config_path: str = "configs/config.yaml") -> HybridRAG:
         cfg["embedding"]["model"], cfg["embedding"]["device"], cfg["embedding"]["batch_size"],
     )
 
-    doc_db = Chroma(persist_directory=cfg["paths"]["chroma_docs"], embedding_function=embedding)
-    sum_db = Chroma(persist_directory=cfg["paths"]["chroma_summaries"], embedding_function=embedding)
+    doc_db = Chroma(persist_directory=_abs(cfg["paths"]["chroma_docs"]), embedding_function=embedding)
+    sum_db = Chroma(persist_directory=_abs(cfg["paths"]["chroma_summaries"]), embedding_function=embedding)
 
-    G = load_graph(cfg["paths"]["graph"])
-    node_retriever = NodeRetriever.build_from_graph(G, embedding, "indices/chroma_nodes")
+    G = load_graph(_abs(cfg["paths"]["graph"]))
+    node_retriever = NodeRetriever.build_from_graph(G, embedding, _abs("indices/chroma_nodes"))
 
-    reviews = pd.read_parquet(f"{cfg['paths']['processed_dir']}/reviews.parquet")
+    reviews = pd.read_parquet(_abs(f"{cfg['paths']['processed_dir']}/reviews.parquet"))
     reviews_map = dict(zip(reviews["review_id"], reviews["content"]))
 
     router_llm = QwenClient(
         api_key=api_key, model=cfg["qwen"]["router_model"],
         timeout=cfg["qwen"]["timeout"], max_retries=cfg["qwen"]["max_retries"],
+        base_url=cfg["qwen"].get("base_url"),
         temperature=0.0,
     )
     gen_llm = QwenClient(
         api_key=api_key, model=cfg["qwen"]["generate_model"],
         timeout=cfg["qwen"]["timeout"], max_retries=cfg["qwen"]["max_retries"],
+        base_url=cfg["qwen"].get("base_url"),
         temperature=cfg["generation"]["temperature"],
         max_tokens=cfg["generation"]["max_tokens"],
     )

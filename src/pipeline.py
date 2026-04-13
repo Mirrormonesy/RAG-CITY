@@ -26,10 +26,13 @@ class HybridRAG:
     def query(self, question: str) -> dict:
         decision = self.router.route(question)
 
+        v_docs, g_docs = [], []
         if decision.route == "vector":
-            docs = self.vec.retrieve(question, k=self.vector_k)
+            v_docs = self.vec.retrieve(question, k=self.vector_k)
+            docs = v_docs
         elif decision.route == "graph":
-            docs = self.graph.retrieve(question)
+            g_docs = self.graph.retrieve(question)
+            docs = g_docs
         else:  # hybrid
             v_docs = self.vec.retrieve(question, k=self.vector_k)
             g_docs = self.graph.retrieve(question)
@@ -43,6 +46,8 @@ class HybridRAG:
             "citations": ans["citations"],
             "route": decision.route,
             "route_reason": decision.reason,
+            "vector_docs": v_docs,
+            "graph_docs": g_docs,
             "retrieved_docs": docs,
             "reranked_docs": reranked,
         }
