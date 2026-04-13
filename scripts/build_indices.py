@@ -1,8 +1,13 @@
 """一键构建所有索引。支持 --skip-* 与断点续传。"""
 import argparse
 import os
+import sys
 import time
 from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
 import pandas as pd
 from dotenv import load_dotenv
 from src.utils.config import load_config
@@ -55,6 +60,7 @@ def main():
             model=cfg["qwen"]["extract_model"],
             timeout=cfg["qwen"]["timeout"],
             max_retries=cfg["qwen"]["max_retries"],
+            base_url=cfg["qwen"].get("base_url"),
         )
         G = build_graph(products, reviews, extract_llm,
                         resume_file="indices/graph_partial.jsonl")
@@ -75,6 +81,7 @@ def main():
             model=cfg["qwen"]["summary_model"],
             timeout=cfg["qwen"]["timeout"],
             max_retries=cfg["qwen"]["max_retries"],
+            base_url=cfg["qwen"].get("base_url"),
         )
         summaries = generate_community_summaries(G, comms, summary_llm, reviews_map)
         save_communities(summaries, cfg["paths"]["communities"])

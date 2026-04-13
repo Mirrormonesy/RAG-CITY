@@ -1,9 +1,10 @@
 qwen:
   api_key_env: QWEN_API_KEY
-  router_model: qwen-turbo
-  extract_model: qwen-turbo
-  summary_model: qwen-turbo
-  generate_model: qwen-plus
+  base_url: https://dashscope-intl.aliyuncs.com/api/v1
+  router_model: qwen2.5-7b-instruct-1m
+  extract_model: qwen-plus-2025-07-28
+  summary_model: qwen-plus-2025-07-28
+  generate_model: qwen3-max
   timeout: 30
   max_retries: 2
 

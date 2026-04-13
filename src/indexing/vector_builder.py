@@ -13,7 +13,7 @@ def format_review_chunk(row) -> str:
     return str(row["content"])
 
 def _to_documents(products, reviews):
-    docs = []
+    docs, ids = [], []
     for _, p in products.iterrows():
         docs.append(Document(
             page_content=format_product_chunk(p),
@@ -21,19 +21,23 @@ def _to_documents(products, reviews):
                       "category": p["category"], "brand": p["brand"],
                       "price": float(p.get("price", 0))},
         ))
+        ids.append(f"product::{p['product_id']}")
     for _, r in reviews.iterrows():
         docs.append(Document(
             page_content=format_review_chunk(r),
             metadata={"doc_type": "review", "review_id": r["review_id"],
                       "product_id": r["product_id"], "rating": int(r["rating"])},
         ))
-    return docs
+        ids.append(f"review::{r['review_id']}")
+    return docs, ids
 
 def build_vector_index(products, reviews, embedding, persist_dir: str) -> Chroma:
     Path(persist_dir).mkdir(parents=True, exist_ok=True)
-    docs = _to_documents(products, reviews)
+    docs, ids = _to_documents(products, reviews)
     logger.info(f"Building Chroma index with {len(docs)} documents at {persist_dir}")
-    db = Chroma.from_documents(docs, embedding=embedding, persist_directory=persist_dir)
+    db = Chroma.from_documents(
+        docs, embedding=embedding, persist_directory=persist_dir, ids=ids,
+    )
     if hasattr(db, "persist"):
         db.persist()
     return db

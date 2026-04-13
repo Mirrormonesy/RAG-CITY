@@ -23,6 +23,7 @@ class QwenClient:
         top_p: float = 0.8,
         timeout: int = 60,
         max_retries: int = 3,
+        base_url: Optional[str] = None,
     ) -> None:
         self.api_key = api_key
         self.model = model
@@ -31,6 +32,8 @@ class QwenClient:
         self.top_p = top_p
         self.timeout = timeout
         self.max_retries = max_retries
+        if base_url:
+            dashscope.base_http_api_url = base_url
 
     def _extract_text(self, response) -> str:
         output = getattr(response, "output", None)

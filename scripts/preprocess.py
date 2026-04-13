@@ -1,5 +1,9 @@
 import argparse
+import sys
 from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.data.loader import load_products, load_reviews
 from src.data.cleaner import clean_products, clean_reviews
@@ -10,8 +14,8 @@ from src.utils.logger import get_logger
 def main():
     parser = argparse.ArgumentParser(description="Preprocess products and reviews data.")
     parser.add_argument("--config", default="configs/config.yaml", help="Path to YAML config")
-    parser.add_argument("--products-csv", required=True, help="Path to products CSV")
-    parser.add_argument("--reviews-csv", required=True, help="Path to reviews CSV")
+    parser.add_argument("--products-csv", default="data/raw/products.csv", help="Path to products CSV")
+    parser.add_argument("--reviews-csv", default="data/raw/reviews.csv", help="Path to reviews CSV")
     args = parser.parse_args()
 
     cfg = load_config(args.config)
